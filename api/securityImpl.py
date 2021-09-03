@@ -5,15 +5,11 @@ from expiringdict import ExpiringDict
 import json
 import storageBlobService
 import appSecrets
-
 import sys
-sys.path.insert(0, '../') # needed as common is in the parent folder
+sys.path.insert(0, '..') # needed as common is in the parent folder
 import storageFileService
 import json
 import logging
-
-import sys
-sys.path.insert(0, '../')
 import common
 from loggingBase import clsLoggingBase
 
@@ -36,11 +32,6 @@ class securityImpl(clsLoggingBase):
         self.storageObject = storageBlobService.StorageBlobServiceWrapper(appSecrets.KV_Storage_AccountName)
         self.storageFileObject = storageFileService.storageFileService(appSecrets.KV_Storage_AccountName)
         self.storageKeyLoaded = False
-        self.clsObj = None           # our global instance
-        self.clsImageOperations = None    # our global instance
-        self.clsStatusOperations = None
-        self.cosmosDBObjCreated = False
-        
         return
 
     def get_StorageObject(self):
@@ -48,15 +39,6 @@ class securityImpl(clsLoggingBase):
 
     def get_fileStorageObject(self):
         return self.storageFileObject
-
-    def get_clsObject(self):
-        return self.clsObj
-
-    def get_clsImageOperations(self):
-        return self.clsImageOperations
-
-    def get_clsStatusOperations(self):
-        return self.clsStatusOperations
 
     def validateRequest(self,request):
         super().getLoggingObj().debug("validateRequest")
@@ -93,17 +75,6 @@ class securityImpl(clsLoggingBase):
                                         self.storageFileObject.set_storageKey(storage_key_list[0])
                                         self.storageKeyLoaded = True
                                         bRV = True # set this to true now. 
-                                    if (self.cosmosDBObjCreated == False):
-                                        print("creating cosmos secure object")
-                                        if (len(storage_key_list) >= 4 ):
-                                            #print(storage_key_list[1])
-                                            #print(storage_key_list[2])
-                                            #print(storage_key_list[3])      
-                                            self.clsObj = clsCosmosWrapper(host=storage_key_list[1], key = storage_key_list[2], databaseId=storage_key_list[3])
-                                            self.clsImageOperations = clsCosmosImageProcessingOperations(host=storage_key_list[1], key = storage_key_list[2], databaseId=storage_key_list[3])
-                                            self.clsStatusOperations = clsStatusUpdate(host=storage_key_list[1], key = storage_key_list[2], databaseId=storage_key_list[3])
-                                            self.cosmosDBObjCreated = True
-                                            bRV = True
                             else:
                                 bRV = True
                 else:
@@ -131,15 +102,12 @@ class securityImpl(clsLoggingBase):
     def get_token_with_authorization_code(self, bearerToken):
         super().getLoggingObj().debug("get_token_with_authorization_code")
         import requests
-
         resp = None
-
         # construct our Azure AD obo message
         grant_type= 'urn:ietf:params:oauth:grant-type:jwt-bearer'
         resourceKeyVault ="https://vault.azure.net"
         requested_token_use= 'on_behalf_of'
         scope='openid'
-
         headers = {'content-type': 'application/x-www-form-urlencoded'}
         # Working example
         params = {
@@ -151,7 +119,6 @@ class securityImpl(clsLoggingBase):
             'scope': scope,
             'assertion': bearerToken
         }
-
         URL = 'https://login.microsoftonline.com/{0}/oauth2/token'.format(appSecrets.TenantId)
         resp = requests.post(URL, headers=headers,  data=params) 
         return resp
@@ -171,7 +138,6 @@ class securityImpl(clsLoggingBase):
    
             from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
             from azure.keyvault.models import KeyVaultErrorException
-    
             #Works the following
             kvAuth = KeyVaultAuthentication(credentials=credentials)
             client = KeyVaultClient(kvAuth)
@@ -182,7 +148,6 @@ class securityImpl(clsLoggingBase):
             rv = client.get_secret( appSecrets.KV_VAULT_URL, 
                                     appSecrets.KV_Storage_AccountKeyName, 
                                     appSecrets.KV_Storage_SECRET_VERSION)
-            print(rv)
             secret_bundle.append(rv.value)
             # first the HOST Value
             secret_bundle.append(client.get_secret(appSecrets.KV_VAULT_URL, 

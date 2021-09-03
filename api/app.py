@@ -12,19 +12,10 @@ import appSecrets
 import storageBlobService
 import storageFileApiMapper
 import securityImpl
-import cosmosDBApiMapper
-
-#import azureStorage.azureFileShareTest as azureFileShareTest
-#import azureStorage.mask_creation as mask_creation
 
 app = Flask(__name__)
-
 CORS(app)
-
 securityObj = securityImpl.securityImpl()
-
-# Make the WSGI interface available at the top level so wfastcgi can get it.
-# wsgi_app = app.wsgi_app
 
 @app.errorhandler(401)
 def custom_401(error):
@@ -191,9 +182,6 @@ def delete_taskImpl(task_id, tasks, storageBlobWrapper, request):
 
 # =========================== Core security wrapper ========================= #
 
-constObjectValue = 'clsobject'
-constImageOperationsValue = 'clsimageoperations'
-constStatusOperations = 'clsstatusoperations'
 constStorageFileObject = 'storagefileobject' 
 
 def ValidateSecurityAndProcessRequestCommon(request, funcInvoke, objectTypeRequired = 'storagefileobject'):
@@ -202,17 +190,8 @@ def ValidateSecurityAndProcessRequestCommon(request, funcInvoke, objectTypeRequi
     if (bRV):
         invokerObject = None
         callObject = str(objectTypeRequired).lower()
-        if ( callObject == constObjectValue) :
-            invokerObject = securityObj.get_clsObject()
-        else:
-            if (callObject == constImageOperationsValue):
-                invokerObject = securityObj.get_clsImageOperations()
-            else:
-                if (callObject == constStatusOperations):
-                    invokerObject = securityObj.get_clsStatusOperations()
-                else: 
-                    if (callObject == constStorageFileObject):
-                        invokerObject = securityObj.get_fileStorageObject()
+        if (callObject == constStorageFileObject):
+            invokerObject = securityObj.get_fileStorageObject()
         if (invokerObject):
             return funcInvoke(invokerObject, request)
         else :
@@ -282,66 +261,6 @@ def DashBoardGetAllDestinationFilesInfo():
     return ValidateSecurityAndProcessRequest(request, storageFileApiMapper.DashBoardGetAllDestinationFilesInfo)
 
 # =========================== File Storage APIs ============================= #
-# =========================== Cosmos APIs =================================== # 
-@app.route('/cosmosDB/v1.0/collections', methods=['GET'])
-def get_collections():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.get_collections, constObjectValue)
- 
-@app.route('/cosmosDB/v1.0/documents', methods=['POST'])
-def get_documents():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.get_documents, constObjectValue)
-
-@app.route('/cosmosDB/v1.0/getDocument', methods=['POST'])
-def get_document():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.get_document, constObjectValue)
-
-@app.route('/cosmosDB/v1.0/saveLabelledImageList', methods=['POST'])
-def saveLabelledImageList():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.saveLabelledImageList, constObjectValue)
-
-@app.route('/cosmosDB/v1.0/returnLabelledImageList', methods=['POST'])
-def returnLabelledImageList():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.returnLabelledImageList, constObjectValue)
-
-@app.route('/cosmosDB/v1.0/returnAllExperimentResult', methods=['GET'])
-def returnAllExperimentResult():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.returnAllExperimentResult, constObjectValue)
-
-###############################################################################
-# Image Processsing Operations 
-###############################################################################
-
-@app.route('/cosmosDB/v1.0/operationsInsertLastOffsetDocument', methods=['POST'])
-def operationsInsertLastOffsetDocument():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.operationsInsertLastOffsetDocument, constImageOperationsValue)
-
-@app.route('/cosmosDB/v1.0/operationsGetLastOffset', methods=['POST'])
-def operationsGetLastOffset():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.operationsGetLastOffset, constImageOperationsValue)
-
-@app.route('/cosmosDB/v1.0/removeLastOffsetRecord', methods=['POST'])
-def removeLastOffsetRecord():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.removeLastOffsetRecord, constImageOperationsValue)
-
-@app.route('/cosmosDB/v1.0/removeExistingDocumentDict', methods=['POST'])
-def removeExistingDocumentDict():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.removeExistingDocumentDict, constImageOperationsValue)
-
-###############################################################################
-# Operations Status 
-###############################################################################
-
-@app.route('/cosmosDB/v1.0/returnAllMessageIdGroupedList', methods=['GET'])
-def returnAllMessageIdGroupedList():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.returnAllMessageIdGroupedList, constStatusOperations)
-
-@app.route('/cosmosDB/v1.0/removeAllDocumentsForSpecificMessageId', methods=['POST'])
-def removeAllDocumentsForSpecificMessageId():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.removeAllDocumentsForSpecificMessageId, constStatusOperations)
-
-@app.route('/cosmosDB/v1.0/removeExistingDocumentDictStatus', methods=['POST'])
-def removeExistingDocumentDictStatus():
-    return ValidateSecurityAndProcessRequestCommon(request, cosmosDBApiMapper.removeExistingDocumentDictStatus, constStatusOperations)
 
 if __name__ == '__main__':
     import os
