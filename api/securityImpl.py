@@ -4,18 +4,11 @@ from flask import request, Response
 from expiringdict import ExpiringDict
 import json
 import storageBlobService
-
 import appSecrets
-import cosmosDBApiMapper
 
 import sys
 sys.path.insert(0, '../') # needed as common is in the parent folder
 import storageFileService
-from cosmosDBWrapper import clsCosmosWrapper
-from cosmosImageOperations import clsCosmosImageProcessingOperations
-from cosmosStatusUpdate import clsStatusUpdate
-
-
 import json
 import logging
 
@@ -42,7 +35,6 @@ class securityImpl(clsLoggingBase):
         self.userIdCache = ExpiringDict(max_len=MX_NUM_USER, max_age_seconds=MX_TOKEN_AGE)
         self.storageObject = storageBlobService.StorageBlobServiceWrapper(appSecrets.KV_Storage_AccountName)
         self.storageFileObject = storageFileService.storageFileService(appSecrets.KV_Storage_AccountName)
-
         self.storageKeyLoaded = False
         self.clsObj = None           # our global instance
         self.clsImageOperations = None    # our global instance
