@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+<<<<<<< HEAD
+=======
+
+# Ninad
+.*.py.swp
+>>>>>>> 4f3051757fbc8800601f8b08fb2bd00080a89da4
